@@ -24,7 +24,7 @@ export function LanguageSelector() {
       <DropdownMenuTrigger
         render={
           <Button
-            className="border-border bg-foreground text-background hover:bg-primary hover:text-primary-foreground aria-expanded:bg-primary aria-expanded:text-primary-foreground"
+            className="h-auto border-border bg-foreground py-2 text-background hover:bg-primary hover:text-primary-foreground aria-expanded:bg-primary aria-expanded:text-primary-foreground"
             variant="outline"
             size="sm"
           />
