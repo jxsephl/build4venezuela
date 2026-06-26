@@ -1,0 +1,114 @@
+{
+  "Metadata": {
+    "title": "BUILD4VENEZUELA | Hackathon global",
+    "description": "Uma hackathon global de 72 horas para criar ferramentas úteis para a Venezuela após os terremotos de 24 de junho."
+  },
+  "Header": {
+    "brand": "Build4Venezuela",
+    "mobileBrand": "B4B",
+    "languageSelector": {
+      "label": "Idioma",
+      "locales": {
+        "en": "Inglês",
+        "es": "Espanhol",
+        "zh": "Chinês",
+        "ja": "Japonês",
+        "fr": "Francês",
+        "pt": "Português"
+      }
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "logoAlt": "Construir pela Venezuela",
+      "mapAlt": "Mapa da Venezuela",
+      "eyebrow": "Uma hackathon humanitária para",
+      "title": "construir soluções tecnológicas para a Venezuela.",
+      "eventLink": "26, 27 e 28 de junho // online // luma.com",
+      "whatsapp": "WhatsApp",
+      "discord": "Discord",
+      "description": "Porque, em momentos de crise, a tecnologia também pode ser uma forma de solidariedade."
+    },
+    "context": {
+      "eyebrow": "Contexto",
+      "title": "Construir com urgência, não com ruído.",
+      "firstParagraph": "A Venezuela enfrenta uma grande emergência após dois fortes terremotos em 24 de junho. Os relatórios mais recentes mencionam pelo menos 188 mortos e mais de 1.500 feridos.",
+      "secondParagraph": "Equipes de resgate ainda procuram sobreviventes. Voos de ajuda internacional e equipes de apoio começaram a chegar, enquanto hospitais, prédios e comunidades afetadas enfrentam uma crise humanitária em desenvolvimento.",
+      "latestInfo": "Ver as informações mais recentes"
+    },
+    "impactStats": [
+      { "value": "188+", "label": "pessoas mortas" },
+      { "value": "1,500+", "label": "pessoas feridas" },
+      { "value": "346+", "label": "estruturas danificadas" },
+      { "value": "200+", "label": "pessoas possivelmente presas" }
+    ],
+    "projects": {
+      "eyebrow": "Ideias de projetos",
+      "title": "O que você pode construir",
+      "description": "Escolha um problema concreto. Reduza o escopo. Deixe algo que outra pessoa possa usar na segunda-feira."
+    },
+    "projectIdeas": [
+      "Diretórios verificados de abrigos, centros de coleta e atendimento médico.",
+      "Mapas leves para reportar necessidades por área e atualizar status.",
+      "Bots de WhatsApp para orientar famílias, voluntários e doadores.",
+      "Ferramentas para coordenar voluntários, transporte, estoque e entregas.",
+      "Páginas simples para traduzir informações críticas e combater rumores.",
+      "Sistemas de acompanhamento para casos, pedidos de ajuda e contatos locais."
+    ],
+    "join": {
+      "eyebrow": "Participe",
+      "title": "Venha com uma habilidade. Saia com um projeto."
+    },
+    "channels": [
+      {
+        "label": "Luma",
+        "href": "https://build4venezuela.com/luma",
+        "text": "Inscreva-se no evento e receba atualizações oficiais."
+      },
+      {
+        "label": "WhatsApp",
+        "href": "https://build4venezuela.com/whatsapp",
+        "text": "Entre no grupo para coordenação rápida e anúncios urgentes."
+      },
+      {
+        "label": "Discord",
+        "href": "https://build4venezuela.com/discord",
+        "text": "Encontre uma equipe, canal de projeto, mentores e suporte técnico."
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/crafter-station/build4venezuela",
+        "text": "Revise o repositório, abra issues e compartilhe o progresso do projeto."
+      }
+    ],
+    "footer": {
+      "description": "Build for Venezuela é organizado por uma comunidade de builders, designers e aliados que acreditam que a tecnologia também pode ser uma forma de solidariedade."
+    },
+    "partners": [
+      {
+        "name": "Moraleja Studio",
+        "href": "https://moraleja.co",
+        "image": "moraleja-studio.svg",
+        "width": 65,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[88px] select-none sm:max-w-[105px]"
+      },
+      {
+        "name": "Crafter Station",
+        "href": "https://crafterstation.com",
+        "image": "CS.svg",
+        "width": 140,
+        "height": 34,
+        "className": "mx-auto h-auto w-full max-w-[140px] select-none sm:max-w-[190px]"
+      },
+      {
+        "name": "The Hackathon Company",
+        "href": "https://hackathon.lat",
+        "image": "THC.svg",
+        "width": 92,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
+      }
+    ]
+  }
+}

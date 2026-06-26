@@ -1,0 +1,114 @@
+{
+  "Metadata": {
+    "title": "BUILD4VENEZUELA | 全球黑客松",
+    "description": "一场全球 72 小时黑客松，为 6 月 24 日地震后的委内瑞拉构建实用工具。"
+  },
+  "Header": {
+    "brand": "Build4Venezuela",
+    "mobileBrand": "B4B",
+    "languageSelector": {
+      "label": "语言",
+      "locales": {
+        "en": "英语",
+        "es": "西班牙语",
+        "zh": "中文",
+        "ja": "日语",
+        "fr": "法语",
+        "pt": "葡萄牙语"
+      }
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "logoAlt": "为委内瑞拉而建",
+      "mapAlt": "委内瑞拉地图",
+      "eyebrow": "一场人道主义黑客松，旨在",
+      "title": "为委内瑞拉构建技术解决方案。",
+      "eventLink": "6 月 26、27、28 日 // 在线 // luma.com",
+      "whatsapp": "WhatsApp",
+      "discord": "Discord",
+      "description": "因为在危机时刻，技术也可以成为一种团结互助的形式。"
+    },
+    "context": {
+      "eyebrow": "背景",
+      "title": "带着紧迫感构建，而不是制造噪音。",
+      "firstParagraph": "6 月 24 日两次强震后，委内瑞拉正面临重大紧急情况。最新报告称，至少 188 人遇难，超过 1,500 人受伤。",
+      "secondParagraph": "救援队仍在搜寻幸存者。国际援助航班和支援团队已经开始抵达，而医院、建筑物和受影响社区正面临持续发展的人道主义危机。",
+      "latestInfo": "查看最新信息"
+    },
+    "impactStats": [
+      { "value": "188+", "label": "遇难人数" },
+      { "value": "1,500+", "label": "受伤人数" },
+      { "value": "346+", "label": "受损建筑" },
+      { "value": "200+", "label": "可能被困人员" }
+    ],
+    "projects": {
+      "eyebrow": "项目想法",
+      "title": "你可以构建什么",
+      "description": "选择一个具体问题。缩小范围。留下一个别人到周一就能使用的东西。"
+    },
+    "projectIdeas": [
+      "经过验证的避难所、物资收集点和医疗服务目录。",
+      "轻量地图，用于按区域报告需求并更新状态。",
+      "WhatsApp 机器人，用于指导家庭、志愿者和捐助者。",
+      "协调志愿者、交通、库存和配送的工具。",
+      "用于翻译关键信息并打击谣言的简单页面。",
+      "用于案件、援助请求和本地联系人管理的跟踪系统。"
+    ],
+    "join": {
+      "eyebrow": "加入",
+      "title": "带着一项技能而来，带着一个项目离开。"
+    },
+    "channels": [
+      {
+        "label": "Luma",
+        "href": "https://build4venezuela.com/luma",
+        "text": "报名参加活动并接收官方更新。"
+      },
+      {
+        "label": "WhatsApp",
+        "href": "https://build4venezuela.com/whatsapp",
+        "text": "加入群组，进行快速协调并接收紧急公告。"
+      },
+      {
+        "label": "Discord",
+        "href": "https://build4venezuela.com/discord",
+        "text": "寻找团队、项目频道、导师和技术支持。"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/crafter-station/build4venezuela",
+        "text": "查看代码仓库、创建 issue，并分享项目进展。"
+      }
+    ],
+    "footer": {
+      "description": "Build for Venezuela 由一群建设者、设计师和盟友组成的社区组织，他们相信技术也可以成为一种团结互助的形式。"
+    },
+    "partners": [
+      {
+        "name": "Moraleja Studio",
+        "href": "https://moraleja.co",
+        "image": "moraleja-studio.svg",
+        "width": 65,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[88px] select-none sm:max-w-[105px]"
+      },
+      {
+        "name": "Crafter Station",
+        "href": "https://crafterstation.com",
+        "image": "CS.svg",
+        "width": 140,
+        "height": 34,
+        "className": "mx-auto h-auto w-full max-w-[140px] select-none sm:max-w-[190px]"
+      },
+      {
+        "name": "The Hackathon Company",
+        "href": "https://hackathon.lat",
+        "image": "THC.svg",
+        "width": 92,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
+      }
+    ]
+  }
+}

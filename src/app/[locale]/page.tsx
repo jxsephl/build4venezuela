@@ -1,45 +1,32 @@
 import Image from "next/image";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { LanguageSelector } from "@/components/language-selector";
 
 const assetPath = "/BFV/assets/";
 
-const projectIdeas = [
-  "Directorios verificados de refugios, centros de acopio y atención médica.",
-  "Mapas ligeros para reportar necesidades por zona y actualizar estados.",
-  "Bots de WhatsApp para orientar a familias, voluntarios y donantes.",
-  "Herramientas para coordinar voluntarios, transporte, inventario y entregas.",
-  "Páginas simples para traducir información crítica y combatir rumores.",
-  "Sistemas de seguimiento para casos, solicitudes de ayuda y contactos locales.",
-];
+type Props = {
+  params: Promise<{ locale: string }>;
+};
 
-const channels = [
-  {
-    label: "Luma",
-    href: "https://build4venezuela.com/luma",
-    text: "Regístrate al evento y recibe actualizaciones oficiales.",
-  },
-  {
-    label: "WhatsApp",
-    href: "https://build4venezuela.com/whatsapp",
-    text: "Entra al grupo para coordinación rápida y anuncios urgentes.",
-  },
-  {
-    label: "Discord",
-    href: "https://build4venezuela.com/discord",
-    text: "Encuentra equipo, canal de proyecto, mentores y soporte técnico.",
-  },
-  {
-    label: "GitHub",
-    href: "https://github.com/crafter-station/build4venezuela",
-    text: "Revisa el repositorio, abre issues y comparte avances del proyecto.",
-  },
-];
+type Channel = {
+  label: string;
+  href: string;
+  text: string;
+};
 
-const impactStats = [
-  { value: "188+", label: "personas fallecidas" },
-  { value: "1,500+", label: "personas heridas" },
-  { value: "346+", label: "estructuras dañadas" },
-  { value: "200+", label: "personas posiblemente atrapadas" },
-];
+type ImpactStat = {
+  value: string;
+  label: string;
+};
+
+type Partner = {
+  name: string;
+  href: string;
+  image: string;
+  width: number;
+  height: number;
+  className: string;
+};
 
 function VMark({ className }: { className: string }) {
   return (
@@ -54,10 +41,30 @@ function VMark({ className }: { className: string }) {
   );
 }
 
-export default function Home() {
+export default async function Home({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const headerT = await getTranslations("Header");
+  const t = await getTranslations("HomePage");
+  const projectIdeas = t.raw("projectIdeas") as string[];
+  const channels = t.raw("channels") as Channel[];
+  const impactStats = t.raw("impactStats") as ImpactStat[];
+  const partners = t.raw("partners") as Partner[];
+
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <section className="relative isolate flex min-h-screen items-center justify-center px-4 py-4 sm:px-8 lg:px-10">
+      <header className="fixed inset-x-0 top-0 isolate z-40 border-white/15 border-b bg-black/95 px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <p className="font-mono text-sm font-black uppercase leading-none tracking-[0.18em] text-white sm:text-base">
+            <span className="sm:hidden">{headerT("mobileBrand")}</span>
+            <span className="hidden sm:inline">{headerT("brand")}</span>
+          </p>
+          <LanguageSelector />
+        </div>
+      </header>
+
+      <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-black" />
         <div className="absolute inset-0 -z-10 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.22)_1px,transparent_1px)] [background-size:48px_48px]" />
 
@@ -69,7 +76,7 @@ export default function Home() {
         <article className="poster-frame relative flex min-h-[calc(100svh-2rem)] w-full max-w-[1120px] flex-col items-center justify-center gap-[clamp(1.75rem,4svh,3.5rem)] py-10 sm:min-h-[calc(100svh-2rem)] sm:py-12 lg:gap-[clamp(1.6rem,3svh,3rem)] lg:py-10">
           <header className="flex w-full flex-col items-center">
             <Image
-              alt="Build for Venezuela"
+              alt={t("hero.logoAlt")}
               className="w-[min(82vw,520px)] select-none sm:w-[min(70vw,600px)] lg:w-[min(58vw,620px)]"
               draggable="false"
               height={285}
@@ -90,7 +97,7 @@ export default function Home() {
               width={940}
             />
             <Image
-              alt="Map of Venezuela"
+              alt={t("hero.mapAlt")}
               className="relative z-10 w-[min(34vw,180px)] min-w-28 select-none drop-shadow-[0_0_30px_rgba(255,255,255,0.14)] sm:w-[min(26vw,210px)] lg:w-[min(16vw,190px)]"
               draggable="false"
               height={309}
@@ -110,10 +117,10 @@ export default function Home() {
 
           <div className="w-full text-center font-mono uppercase">
             <p className="mx-auto max-w-[920px] text-balance text-[clamp(1.1rem,2.3vw,2rem)] font-light leading-[1.15] tracking-[0.14em] text-white">
-              Una hackathon humanitaria para
+              {t("hero.eyebrow")}
             </p>
             <p className="mx-auto mt-3 max-w-[920px] text-balance text-[clamp(1.2rem,2.35vw,2.1rem)] font-black leading-[1.2] tracking-[0.04em] text-white">
-              construir soluciones tech por Venezuela.
+              {t("hero.title")}
             </p>
           </div>
 
@@ -122,27 +129,26 @@ export default function Home() {
               className="inline-block text-[clamp(0.95rem,1.75vw,1.45rem)] font-light leading-snug tracking-[0.24em] text-white transition hover:text-[#fcd43d] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fcd43d] focus-visible:ring-offset-4 focus-visible:ring-offset-black"
               href="https://build4venezuela.com/luma"
             >
-              {"26,27,28 de junio // online // luma.com"}
+              {t("hero.eventLink")}
             </a>
             <div className="mt-4 flex justify-center gap-4 text-xs font-light tracking-[0.24em] text-white/65 sm:gap-6 sm:text-sm">
               <a
                 className="transition hover:text-[#6fcaef] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6fcaef] focus-visible:ring-offset-4 focus-visible:ring-offset-black"
                 href="https://build4venezuela.com/whatsapp"
               >
-                WhatsApp
+                {t("hero.whatsapp")}
               </a>
               <span aria-hidden="true">{"//"}</span>
               <a
                 className="transition hover:text-[#ef3b56] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3b56] focus-visible:ring-offset-4 focus-visible:ring-offset-black"
                 href="https://build4venezuela.com/discord"
               >
-                Discord
+                {t("hero.discord")}
               </a>
             </div>
             <div className="mt-8 h-px w-full bg-white/35 sm:mt-10" />
             <p className="mx-auto mt-6 max-w-[760px] text-balance text-center text-[clamp(1rem,1.8vw,1.5rem)] font-light leading-[1.35] tracking-[0.12em] text-white sm:mt-7">
-              Porque en momentos de crisis, la tecnología también puede ser una
-              forma de solidaridad.
+              {t("hero.description")}
             </p>
             <div className="mt-8 h-px w-full bg-white/35 sm:mt-10" />
           </div>
@@ -153,32 +159,23 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
           <div>
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-[#6fcaef]">
-              Contexto
+              {t("context.eyebrow")}
             </p>
             <h2 className="mt-5 text-balance font-mono text-[clamp(2.25rem,5vw,5rem)] font-black uppercase leading-[0.9] tracking-[-0.04em]">
-              Construir con urgencia, no con ruido.
+              {t("context.title")}
             </h2>
           </div>
 
           <div className="space-y-7 font-mono text-[clamp(1.05rem,1.8vw,1.45rem)] font-light leading-relaxed tracking-[0.06em] text-white/78">
-            <p>
-              Venezuela enfrenta una emergencia mayor después de dos fuertes
-              terremotos el 24 de junio. Los reportes más recientes hablan de al
-              menos 188 personas fallecidas y más de 1,500 heridas.
-            </p>
-            <p>
-              Equipos de rescate siguen buscando sobrevivientes. Vuelos de ayuda
-              internacional y equipos de apoyo ya comenzaron a llegar, mientras
-              hospitales, edificios y comunidades afectadas enfrentan una crisis
-              humanitaria en desarrollo.
-            </p>
+            <p>{t("context.firstParagraph")}</p>
+            <p>{t("context.secondParagraph")}</p>
             <a
               className="inline-flex border border-[#6fcaef]/60 px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#6fcaef] transition hover:border-white hover:bg-white hover:text-black"
               href="https://www.perplexity.ai/?q=What%E2%80%99s%20the%20latest%20on%20the%20Venezuela%20earthquakes?"
               rel="noreferrer"
               target="_blank"
             >
-              Ver información más reciente
+              {t("context.latestInfo")}
             </a>
           </div>
         </div>
@@ -204,15 +201,14 @@ export default function Home() {
           <div className="mb-10 flex flex-col justify-between gap-5 border-white/15 border-b pb-8 sm:mb-12 md:flex-row md:items-end">
             <div>
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-[#fcd43d]">
-                Ideas de proyectos
+                {t("projects.eyebrow")}
               </p>
               <h2 className="mt-4 font-mono text-[clamp(2rem,4vw,3.75rem)] font-black uppercase leading-none tracking-[-0.04em]">
-                Qué puedes construir
+                {t("projects.title")}
               </h2>
             </div>
             <p className="max-w-md font-mono text-sm uppercase leading-6 tracking-[0.16em] text-white/55">
-              Elige un problema concreto. Reduce el alcance. Deja algo que otra
-              persona pueda usar el lunes.
+              {t("projects.description")}
             </p>
           </div>
 
@@ -236,10 +232,10 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:items-start">
             <div>
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-black/45">
-                Únete
+                {t("join.eyebrow")}
               </p>
               <h2 className="mt-4 font-mono text-[clamp(2.3rem,5vw,5.5rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
-                Ven con una habilidad. Sal con un proyecto.
+                {t("join.title")}
               </h2>
             </div>
 
@@ -266,57 +262,28 @@ export default function Home() {
       <footer className="bg-black px-5 py-14 text-white sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-6xl flex-col-reverse gap-10 border-white/15 border-t pt-12 md:flex-row md:items-center md:justify-between">
           <p className="max-w-md font-mono text-xs uppercase leading-6 tracking-[0.2em] text-white/45">
-            Build for Venezuela es organizado por una comunidad de builders,
-            diseñadores y aliados que creen que la tecnología también puede ser
-            una forma de solidaridad.
+            {t("footer.description")}
           </p>
 
           <div className="grid w-full max-w-[340px] grid-cols-3 items-center gap-3 sm:max-w-[560px] sm:gap-10 md:w-auto">
-            <a
-              className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black"
-              href="https://moraleja.co"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Image
-                alt="Moraleja Studio"
-                className="mx-auto h-auto w-full max-w-[88px] select-none sm:max-w-[105px]"
-                draggable="false"
-                height={52}
-                src={`${assetPath}moraleja-studio.svg`}
-                width={65}
-              />
-            </a>
-            <a
-              className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black"
-              href="https://crafterstation.com"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Image
-                alt="Crafter Station"
-                className="mx-auto h-auto w-full max-w-[140px] select-none sm:max-w-[190px]"
-                draggable="false"
-                height={34}
-                src={`${assetPath}CS.svg`}
-                width={140}
-              />
-            </a>
-            <a
-              className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black"
-              href="https://hackathon.lat"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Image
-                alt="The Hackathon Company"
-                className="mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
-                draggable="false"
-                height={52}
-                src={`${assetPath}THC.svg`}
-                width={92}
-              />
-            </a>
+            {partners.map((partner) => (
+              <a
+                className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                href={partner.href}
+                key={partner.name}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <Image
+                  alt={partner.name}
+                  className={partner.className}
+                  draggable="false"
+                  height={partner.height}
+                  src={`${assetPath}${partner.image}`}
+                  width={partner.width}
+                />
+              </a>
+            ))}
           </div>
         </div>
       </footer>

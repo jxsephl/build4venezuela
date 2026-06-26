@@ -1,0 +1,114 @@
+{
+  "Metadata": {
+    "title": "BUILD4VENEZUELA | グローバルハッカソン",
+    "description": "6月24日の地震後のベネズエラに役立つツールをつくる、世界規模の72時間ハッカソン。"
+  },
+  "Header": {
+    "brand": "Build4Venezuela",
+    "mobileBrand": "B4B",
+    "languageSelector": {
+      "label": "言語",
+      "locales": {
+        "en": "英語",
+        "es": "スペイン語",
+        "zh": "中国語",
+        "ja": "日本語",
+        "fr": "フランス語",
+        "pt": "ポルトガル語"
+      }
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "logoAlt": "ベネズエラのために築く",
+      "mapAlt": "ベネズエラの地図",
+      "eyebrow": "人道支援のためのハッカソンで",
+      "title": "ベネズエラのための技術ソリューションを構築する。",
+      "eventLink": "6月26日、27日、28日 // オンライン // luma.com",
+      "whatsapp": "WhatsApp",
+      "discord": "Discord",
+      "description": "危機の瞬間に、テクノロジーも連帯の形になり得るからです。"
+    },
+    "context": {
+      "eyebrow": "背景",
+      "title": "騒音ではなく、緊急性をもってつくる。",
+      "firstParagraph": "ベネズエラは、6月24日に発生した2度の強い地震の後、大きな緊急事態に直面しています。最新の報告では、少なくとも188人が死亡し、1,500人以上が負傷したとされています。",
+      "secondParagraph": "救助隊は今も生存者の捜索を続けています。国際支援の航空便や支援チームが到着し始める一方で、病院、建物、被災したコミュニティは進行中の人道危機に直面しています。",
+      "latestInfo": "最新情報を見る"
+    },
+    "impactStats": [
+      { "value": "188+", "label": "死亡者" },
+      { "value": "1,500+", "label": "負傷者" },
+      { "value": "346+", "label": "損壊した建物" },
+      { "value": "200+", "label": "閉じ込められている可能性のある人" }
+    ],
+    "projects": {
+      "eyebrow": "プロジェクト案",
+      "title": "何をつくれるか",
+      "description": "具体的な問題を選びましょう。スコープを絞りましょう。月曜日に誰かが使えるものを残しましょう。"
+    },
+    "projectIdeas": [
+      "避難所、物資集積所、医療支援先の確認済みディレクトリ。",
+      "地域ごとのニーズ報告とステータス更新のための軽量マップ。",
+      "家族、ボランティア、寄付者を案内するWhatsAppボット。",
+      "ボランティア、交通、在庫、配送を調整するツール。",
+      "重要情報を翻訳し、噂に対抗するためのシンプルなページ。",
+      "ケース、支援要請、地域連絡先を追跡するシステム。"
+    ],
+    "join": {
+      "eyebrow": "参加する",
+      "title": "スキルを持って参加し、プロジェクトを持って帰ろう。"
+    },
+    "channels": [
+      {
+        "label": "Luma",
+        "href": "https://build4venezuela.com/luma",
+        "text": "イベントに登録して公式アップデートを受け取りましょう。"
+      },
+      {
+        "label": "WhatsApp",
+        "href": "https://build4venezuela.com/whatsapp",
+        "text": "迅速な調整と緊急のお知らせのためにグループに参加しましょう。"
+      },
+      {
+        "label": "Discord",
+        "href": "https://build4venezuela.com/discord",
+        "text": "チーム、プロジェクトチャンネル、メンター、技術サポートを見つけましょう。"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/crafter-station/build4venezuela",
+        "text": "リポジトリを確認し、issueを開き、プロジェクトの進捗を共有しましょう。"
+      }
+    ],
+    "footer": {
+      "description": "Build for Venezuelaは、テクノロジーも連帯の形になり得ると信じるビルダー、デザイナー、支援者のコミュニティによって運営されています。"
+    },
+    "partners": [
+      {
+        "name": "Moraleja Studio",
+        "href": "https://moraleja.co",
+        "image": "moraleja-studio.svg",
+        "width": 65,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[88px] select-none sm:max-w-[105px]"
+      },
+      {
+        "name": "Crafter Station",
+        "href": "https://crafterstation.com",
+        "image": "CS.svg",
+        "width": 140,
+        "height": 34,
+        "className": "mx-auto h-auto w-full max-w-[140px] select-none sm:max-w-[190px]"
+      },
+      {
+        "name": "The Hackathon Company",
+        "href": "https://hackathon.lat",
+        "image": "THC.svg",
+        "width": 92,
+        "height": 52,
+        "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
+      }
+    ]
+  }
+}
