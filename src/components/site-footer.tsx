@@ -23,7 +23,7 @@ export async function SiteFooter() {
           {t("footer.description")}
         </p>
 
-        <div className="grid w-full max-w-[340px] grid-cols-3 items-center gap-3 sm:max-w-[560px] sm:gap-10 md:w-auto">
+        <div className="grid w-full max-w-[460px] grid-cols-4 items-center gap-3 sm:max-w-[740px] sm:gap-10 md:w-auto">
           {partners.map((partner) => (
             <a
               className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
@@ -42,6 +42,21 @@ export async function SiteFooter() {
               />
             </a>
           ))}
+          <a
+            className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+            href="http://nucleo.la/"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <Image
+              alt="Nucleo"
+              className="mx-auto h-auto w-full max-w-[160px] select-none sm:max-w-[190px]"
+              draggable="false"
+              height={107}
+              src={`${assetPath}nucleo-wordmark-blanco.png`}
+              width={190}
+            />
+          </a>
         </div>
       </div>
     </footer>
