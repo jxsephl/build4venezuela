@@ -7,8 +7,10 @@ import {
   canEditProject,
   getProjectBySlug,
   hasVoted,
+  listComments,
 } from "@/lib/projects/store";
 import { ProjectShell } from "../../project-shell";
+import { CommentsSection } from "./comments-section";
 import { VoteButton } from "./vote-button";
 
 type Props = {
@@ -40,6 +42,7 @@ export default async function ProjectPage({ params }: Props) {
   const { userId } = await auth();
   const canEdit = await canEditProject(project.id, userId);
   const voted = await hasVoted(project.id, userId ?? undefined);
+  const comments = await listComments(project.id, userId ?? undefined);
 
   return (
     <ProjectShell>
@@ -113,6 +116,11 @@ export default async function ProjectPage({ params }: Props) {
             <ProjectMarkdown markdown={project.descriptionMarkdown} />
           </section>
         </div>
+        <CommentsSection
+          initialComments={comments}
+          initialSignedIn={Boolean(userId)}
+          projectId={project.id}
+        />
       </article>
     </ProjectShell>
   );

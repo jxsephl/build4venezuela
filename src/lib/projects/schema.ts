@@ -16,6 +16,17 @@ export type Project = {
   votesCount: number;
 };
 
+export type ProjectComment = {
+  id: string;
+  projectId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  votesCount: number;
+  voted: boolean;
+};
+
 export type ProjectStatus = "draft" | "published" | "hidden";
 
 export type ProjectFormState = {
@@ -76,6 +87,16 @@ export const projectFormSchema = z.object({
 });
 
 export type ProjectFormInput = z.infer<typeof projectFormSchema>;
+
+export const projectCommentSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(3, "Add at least 3 characters.")
+    .max(1200, "Keep comments under 1,200 characters."),
+});
+
+export type ProjectCommentInput = z.infer<typeof projectCommentSchema>;
 
 export function normalizeCountries(countries: string) {
   return countries
