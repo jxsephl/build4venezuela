@@ -33,7 +33,7 @@ export async function PATCH(request: Request, { params }: Props) {
 
   const values = body.value as Record<string, string>;
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: rateLimitKey(request, "project:update", userId),
     limit: 20,
     windowMs: 60 * 60 * 1000,

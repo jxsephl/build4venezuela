@@ -1,4 +1,7 @@
+import { type Duration, Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 type RateLimitOptions = {
   key: string;
@@ -6,17 +9,38 @@ type RateLimitOptions = {
   windowMs: number;
 };
 
-type RateLimitBucket = {
-  count: number;
-  resetAt: number;
-};
-
 type JsonObjectResult =
   | { ok: true; value: Record<string, unknown> }
   | { ok: false; response: NextResponse };
 
-const rateLimitBuckets = new Map<string, RateLimitBucket>();
 const unknownClient = "unknown";
+const redis = new Redis({
+  url: env.UPSTASH_REDIS_REST_URL,
+  token: env.UPSTASH_REDIS_REST_TOKEN,
+});
+const rateLimiters = new Map<string, Ratelimit>();
+
+function rateLimitWindow(windowMs: number): Duration {
+  return `${windowMs} ms`;
+}
+
+function getRateLimiter(limit: number, windowMs: number) {
+  const key = `${limit}:${windowMs}`;
+  const existing = rateLimiters.get(key);
+
+  if (existing) {
+    return existing;
+  }
+
+  const limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(limit, rateLimitWindow(windowMs)),
+    prefix: `build4venezuela:ratelimit:${key}`,
+  });
+
+  rateLimiters.set(key, limiter);
+  return limiter;
+}
 
 function getClientIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0];
@@ -37,24 +61,29 @@ export function rateLimitKey(
   return `${scope}:${userId ? `user:${userId}` : `ip:${getClientIp(request)}`}`;
 }
 
-export function checkRateLimit({ key, limit, windowMs }: RateLimitOptions) {
-  const now = Date.now();
-  const bucket = rateLimitBuckets.get(key);
+export async function checkRateLimit({
+  key,
+  limit,
+  windowMs,
+}: RateLimitOptions) {
+  try {
+    const result = await getRateLimiter(limit, windowMs).limit(key);
+    void result.pending.catch((error) => {
+      console.error("Failed to persist rate-limit analytics", error);
+    });
 
-  if (!bucket || bucket.resetAt <= now) {
-    rateLimitBuckets.set(key, { count: 1, resetAt: now + windowMs });
-    return { ok: true as const };
-  }
+    if (result.success) {
+      return { ok: true as const };
+    }
 
-  if (bucket.count >= limit) {
     return {
       ok: false as const,
-      retryAfter: Math.ceil((bucket.resetAt - now) / 1000),
+      retryAfter: Math.max(1, Math.ceil((result.reset - Date.now()) / 1000)),
     };
+  } catch (error) {
+    console.error("Failed to check rate limit", error);
+    return { ok: false as const, retryAfter: 60 };
   }
-
-  bucket.count += 1;
-  return { ok: true as const };
 }
 
 export function rateLimitResponse(retryAfter: number) {

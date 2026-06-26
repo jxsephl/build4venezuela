@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: Props) {
     return NextResponse.json({ error: "Sign in to vote." }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: rateLimitKey(request, "project:vote", userId),
     limit: 60,
     windowMs: 60 * 1000,

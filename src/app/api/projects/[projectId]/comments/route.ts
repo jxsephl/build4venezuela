@@ -31,7 +31,7 @@ export async function POST(request: Request, { params }: Props) {
     return NextResponse.json({ error: "Sign in to comment." }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: rateLimitKey(request, "project:comment", userId),
     limit: 10,
     windowMs: 10 * 60 * 1000,

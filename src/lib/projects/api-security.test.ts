@@ -1,7 +1,51 @@
-import { expect, test } from "bun:test";
-import { checkRateLimit, rateLimitKey, readJsonObject } from "./api-security";
+import { expect, mock, test } from "bun:test";
+
+process.env.AI_GATEWAY_API_KEY = "test-ai-gateway-key";
+process.env.CLERK_SECRET_KEY = "test-clerk-secret-key";
+process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "test-clerk-publishable-key";
+process.env.SUPABASE_SERVICE_ROLE_KEY = "test-supabase-service-role-key";
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-supabase-anon-key";
+process.env.UPSTASH_REDIS_REST_URL = "https://example.upstash.io";
+process.env.UPSTASH_REDIS_REST_TOKEN = "test-upstash-token";
+
+const rateLimitCounts = new Map<string, number>();
+
+mock.module("@upstash/redis", () => ({
+  Redis: class Redis {},
+}));
+
+mock.module("@upstash/ratelimit", () => ({
+  Ratelimit: class Ratelimit {
+    private readonly limitValue: number;
+
+    constructor({ limiter }: { limiter: { limit: number } }) {
+      this.limitValue = limiter.limit;
+    }
+
+    static slidingWindow(limit: number, _window: string) {
+      return { limit };
+    }
+
+    async limit(key: string) {
+      const count = (rateLimitCounts.get(key) ?? 0) + 1;
+      rateLimitCounts.set(key, count);
+
+      return {
+        success: count <= this.limitValue,
+        reset: Date.now() + 60_000,
+        pending: Promise.resolve(),
+      };
+    }
+  },
+}));
+
+async function apiSecurity() {
+  return await import("./api-security");
+}
 
 test("readJsonObject returns a clean 400 response for malformed JSON", async () => {
+  const { readJsonObject } = await apiSecurity();
   const result = await readJsonObject(
     new Request("https://example.test/api/projects", {
       body: "{",
@@ -20,6 +64,7 @@ test("readJsonObject returns a clean 400 response for malformed JSON", async () 
 });
 
 test("readJsonObject rejects non-object JSON bodies", async () => {
+  const { readJsonObject } = await apiSecurity();
   const result = await readJsonObject(
     new Request("https://example.test/api/projects", {
       body: JSON.stringify(["not", "an", "object"]),
@@ -37,7 +82,8 @@ test("readJsonObject rejects non-object JSON bodies", async () => {
   }
 });
 
-test("rateLimitKey prefers Clerk user IDs over client IP headers", () => {
+test("rateLimitKey prefers Clerk user IDs over client IP headers", async () => {
+  const { rateLimitKey } = await apiSecurity();
   const request = new Request("https://example.test/api/projects", {
     headers: { "x-forwarded-for": "203.0.113.10, 10.0.0.2" },
   });
@@ -47,17 +93,22 @@ test("rateLimitKey prefers Clerk user IDs over client IP headers", () => {
   );
 });
 
-test("checkRateLimit blocks requests over the configured limit", () => {
+test("checkRateLimit blocks requests over the configured limit", async () => {
+  const { checkRateLimit } = await apiSecurity();
   const key = `test:${crypto.randomUUID()}`;
 
-  expect(checkRateLimit({ key, limit: 2, windowMs: 60_000 })).toEqual({
+  await expect(
+    checkRateLimit({ key, limit: 2, windowMs: 60_000 }),
+  ).resolves.toEqual({
     ok: true,
   });
-  expect(checkRateLimit({ key, limit: 2, windowMs: 60_000 })).toEqual({
+  await expect(
+    checkRateLimit({ key, limit: 2, windowMs: 60_000 }),
+  ).resolves.toEqual({
     ok: true,
   });
 
-  const result = checkRateLimit({ key, limit: 2, windowMs: 60_000 });
+  const result = await checkRateLimit({ key, limit: 2, windowMs: 60_000 });
 
   expect(result.ok).toBe(false);
 

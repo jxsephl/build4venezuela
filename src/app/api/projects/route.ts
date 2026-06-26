@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const rateLimit = checkRateLimit({
+  const rateLimit = await checkRateLimit({
     key: rateLimitKey(request, "project:create", userId),
     limit: 5,
     windowMs: 60 * 60 * 1000,
