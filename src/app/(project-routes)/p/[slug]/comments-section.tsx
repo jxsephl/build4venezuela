@@ -2,7 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
@@ -23,41 +23,18 @@ type CommentsSectionProps = {
   initialSignedIn: boolean;
 };
 
-type CommentVoteRow = {
-  comment_id?: string;
-  voter_id?: string;
-};
-
-type CommentVotePayload = {
-  eventType: "INSERT" | "DELETE" | "UPDATE";
-  new: CommentVoteRow | null;
-  old: CommentVoteRow | null;
-};
-
 const maxCommentLength = 1200;
 const REALTIME_INACTIVE_TIMEOUT_MS = 60_000;
-
-function commentVoteEventKey(
-  eventType: "INSERT" | "DELETE",
-  commentId: string,
-  voterId: string,
-) {
-  return `${eventType}:${commentId}:${voterId}`;
-}
 
 export function CommentsSection({
   projectId,
   initialComments,
   initialSignedIn,
 }: CommentsSectionProps) {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const signedIn = isSignedIn ?? initialSignedIn;
   const queryClient = useQueryClient();
   const commentsQueryKey = projectQueryKeys.comments(projectId);
-  const ignoredRealtimeEventsRef = useRef(new Map<string, number>());
-  const ignoredRealtimeTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>(
-    [],
-  );
   const { data: comments = initialComments } = useQuery({
     initialData: initialComments,
     queryFn: () => fetchProjectComments(projectId),
@@ -65,34 +42,6 @@ export function CommentsSection({
   });
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  function ignoreNextRealtimeEvent(
-    eventType: "INSERT" | "DELETE",
-    commentId: string,
-  ) {
-    if (!user?.id) {
-      return;
-    }
-
-    const key = commentVoteEventKey(eventType, commentId, user.id);
-    ignoredRealtimeEventsRef.current.set(
-      key,
-      (ignoredRealtimeEventsRef.current.get(key) ?? 0) + 1,
-    );
-
-    const timeout = setTimeout(() => {
-      const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
-
-      if (remaining <= 1) {
-        ignoredRealtimeEventsRef.current.delete(key);
-        return;
-      }
-
-      ignoredRealtimeEventsRef.current.set(key, remaining - 1);
-    }, 10_000);
-
-    ignoredRealtimeTimeoutsRef.current.push(timeout);
-  }
 
   const commentMutation = useMutation({
     mutationFn: (commentBody: string) =>
@@ -133,8 +82,6 @@ export function CommentsSection({
         (comment) => comment.id === commentId,
       );
       const nextVoted = !currentComment?.voted;
-
-      ignoreNextRealtimeEvent(nextVoted ? "INSERT" : "DELETE", commentId);
 
       queryClient.setQueryData<ProjectComment[]>(
         commentsQueryKey,
@@ -183,56 +130,6 @@ export function CommentsSection({
     let commentVotesChannel: ReturnType<typeof realtime.channel> | null = null;
     let inactiveTimer: number | null = null;
     let hasConnected = false;
-
-    function updateCommentVote(payload: CommentVotePayload) {
-      if (payload.eventType === "UPDATE") {
-        return;
-      }
-
-      const commentId = payload.new?.comment_id ?? payload.old?.comment_id;
-      const voterId = payload.new?.voter_id ?? payload.old?.voter_id;
-
-      if (!commentId) {
-        return;
-      }
-
-      if (voterId) {
-        const key = commentVoteEventKey(payload.eventType, commentId, voterId);
-        const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
-
-        if (remaining > 0) {
-          if (remaining === 1) {
-            ignoredRealtimeEventsRef.current.delete(key);
-          } else {
-            ignoredRealtimeEventsRef.current.set(key, remaining - 1);
-          }
-
-          return;
-        }
-      }
-
-      const delta = payload.eventType === "INSERT" ? 1 : -1;
-      const effectCommentsQueryKey = projectQueryKeys.comments(projectId);
-
-      queryClient.setQueryData<ProjectComment[]>(
-        effectCommentsQueryKey,
-        (current) =>
-          sortCommentsByVotes(
-            current?.map((comment) =>
-              comment.id === commentId
-                ? {
-                    ...comment,
-                    voted:
-                      voterId === user?.id
-                        ? payload.eventType === "INSERT"
-                        : comment.voted,
-                    votesCount: Math.max(0, comment.votesCount + delta),
-                  }
-                : comment,
-            ) ?? [],
-          ),
-      );
-    }
 
     function disconnect() {
       if (inactiveTimer) {
@@ -285,7 +182,7 @@ export function CommentsSection({
           {
             event: "*",
             schema: "public",
-            table: "project_comments",
+            table: "project_comment_events",
             filter: `project_id=eq.${projectId}`,
           },
           () =>
@@ -302,9 +199,13 @@ export function CommentsSection({
           {
             event: "*",
             schema: "public",
-            table: "project_comment_votes",
+            table: "project_comment_vote_events",
+            filter: `project_id=eq.${projectId}`,
           },
-          (payload) => updateCommentVote(payload as CommentVotePayload),
+          () =>
+            queryClient.invalidateQueries({
+              queryKey: projectQueryKeys.comments(projectId),
+            }),
         )
         .subscribe();
 
@@ -347,16 +248,7 @@ export function CommentsSection({
       document.removeEventListener("visibilitychange", syncVisibility);
       disconnect();
     };
-  }, [projectId, queryClient, user?.id]);
-
-  useEffect(
-    () => () => {
-      for (const timeout of ignoredRealtimeTimeoutsRef.current) {
-        clearTimeout(timeout);
-      }
-    },
-    [],
-  );
+  }, [projectId, queryClient]);
 
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

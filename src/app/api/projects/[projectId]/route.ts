@@ -1,6 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  rateLimitKey,
+  rateLimitResponse,
+  readJsonObject,
+} from "@/lib/projects/api-security";
 import { canEditProject, updateProject } from "@/lib/projects/store";
 import { validateProjectSubmission } from "@/lib/projects/submissions";
 
@@ -11,13 +17,30 @@ type Props = {
 export async function PATCH(request: Request, { params }: Props) {
   const { projectId } = await params;
   const { userId } = await auth();
-  const values = (await request.json()) as Record<string, string>;
 
   if (!userId) {
     return NextResponse.json(
-      { values, errors: { form: "Sign in to edit this project." } },
+      { values: {}, errors: { form: "Sign in to edit this project." } },
       { status: 401 },
     );
+  }
+
+  const body = await readJsonObject(request);
+
+  if (!body.ok) {
+    return body.response;
+  }
+
+  const values = body.value as Record<string, string>;
+
+  const rateLimit = checkRateLimit({
+    key: rateLimitKey(request, "project:update", userId),
+    limit: 20,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return rateLimitResponse(rateLimit.retryAfter);
   }
 
   if (!(await canEditProject(projectId, userId))) {

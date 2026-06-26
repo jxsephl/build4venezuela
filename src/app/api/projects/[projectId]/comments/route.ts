@@ -1,5 +1,11 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  rateLimitKey,
+  rateLimitResponse,
+  readJsonObject,
+} from "@/lib/projects/api-security";
 import { projectCommentSchema, validationErrors } from "@/lib/projects/schema";
 import { checkCommentForSpam } from "@/lib/projects/spam";
 import { createComment, listComments } from "@/lib/projects/store";
@@ -25,7 +31,23 @@ export async function POST(request: Request, { params }: Props) {
     return NextResponse.json({ error: "Sign in to comment." }, { status: 401 });
   }
 
-  const parsed = projectCommentSchema.safeParse(await request.json());
+  const rateLimit = checkRateLimit({
+    key: rateLimitKey(request, "project:comment", userId),
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return rateLimitResponse(rateLimit.retryAfter);
+  }
+
+  const body = await readJsonObject(request);
+
+  if (!body.ok) {
+    return body.response;
+  }
+
+  const parsed = projectCommentSchema.safeParse(body.value);
 
   if (!parsed.success) {
     return NextResponse.json(

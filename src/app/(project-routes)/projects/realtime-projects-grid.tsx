@@ -12,9 +12,7 @@ type RealtimeProjectsGridProps = {
 };
 
 type ProjectVotePayload = {
-  eventType: "INSERT" | "DELETE" | "UPDATE";
-  new: { project_id?: string } | null;
-  old: { project_id?: string } | null;
+  new: { event_type?: "insert" | "delete"; project_id?: string } | null;
 };
 
 export function RealtimeProjectsGrid({
@@ -35,14 +33,13 @@ export function RealtimeProjectsGrid({
     }
 
     function updateVoteCount(payload: ProjectVotePayload) {
-      const projectId =
-        payload.new?.project_id ?? payload.old?.project_id ?? null;
+      const projectId = payload.new?.project_id ?? null;
 
-      if (!projectId || payload.eventType === "UPDATE") {
+      if (!projectId || !payload.new?.event_type) {
         return;
       }
 
-      const delta = payload.eventType === "INSERT" ? 1 : -1;
+      const delta = payload.new.event_type === "insert" ? 1 : -1;
 
       queryClient.setQueryData<Project[]>(projectQueryKeys.list(), (current) =>
         sortProjectsByVotes(
@@ -79,7 +76,7 @@ export function RealtimeProjectsGrid({
         {
           event: "*",
           schema: "public",
-          table: "project_votes",
+          table: "project_vote_events",
         },
         (payload) => updateVoteCount(payload as ProjectVotePayload),
       )

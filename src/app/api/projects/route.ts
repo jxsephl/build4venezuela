@@ -1,6 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  rateLimitKey,
+  rateLimitResponse,
+  readJsonObject,
+} from "@/lib/projects/api-security";
 import { createProject, listProjects } from "@/lib/projects/store";
 import { validateProjectSubmission } from "@/lib/projects/submissions";
 
@@ -18,7 +24,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const values = (await request.json()) as Record<string, string>;
+  const rateLimit = checkRateLimit({
+    key: rateLimitKey(request, "project:create", userId),
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return rateLimitResponse(rateLimit.retryAfter);
+  }
+
+  const body = await readJsonObject(request);
+
+  if (!body.ok) {
+    return body.response;
+  }
+
+  const values = body.value as Record<string, string>;
   const result = await validateProjectSubmission(values);
 
   if (!result.ok) {
