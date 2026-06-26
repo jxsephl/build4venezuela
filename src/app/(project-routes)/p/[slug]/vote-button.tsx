@@ -2,7 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
 import {
@@ -23,21 +23,70 @@ type VoteState = {
   voted: boolean;
 };
 
+type ProjectVoteRow = {
+  project_id?: string;
+  voter_id?: string;
+};
+
+type ProjectVotePayload = {
+  eventType: "INSERT" | "DELETE" | "UPDATE";
+  new: ProjectVoteRow | null;
+  old: ProjectVoteRow | null;
+};
+
+function realtimeEventKey(
+  eventType: "INSERT" | "DELETE",
+  projectId: string,
+  voterId: string,
+) {
+  return `${eventType}:${projectId}:${voterId}`;
+}
+
 export function VoteButton({
   projectId,
   initialCount,
   initialSignedIn,
   initialVoted,
 }: VoteButtonProps) {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const queryClient = useQueryClient();
   const voteQueryKey = projectQueryKeys.votes(projectId);
+  const ignoredRealtimeEventsRef = useRef(new Map<string, number>());
+  const ignoredRealtimeTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>(
+    [],
+  );
   const { data: voteState = { count: initialCount, voted: initialVoted } } =
     useQuery({
       initialData: { count: initialCount, voted: initialVoted },
       queryFn: () => fetchProjectVote(projectId),
       queryKey: voteQueryKey,
     });
+
+  function ignoreNextRealtimeEvent(eventType: "INSERT" | "DELETE") {
+    if (!user?.id) {
+      return;
+    }
+
+    const key = realtimeEventKey(eventType, projectId, user.id);
+    ignoredRealtimeEventsRef.current.set(
+      key,
+      (ignoredRealtimeEventsRef.current.get(key) ?? 0) + 1,
+    );
+
+    const timeout = setTimeout(() => {
+      const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+
+      if (remaining <= 1) {
+        ignoredRealtimeEventsRef.current.delete(key);
+        return;
+      }
+
+      ignoredRealtimeEventsRef.current.set(key, remaining - 1);
+    }, 10_000);
+
+    ignoredRealtimeTimeoutsRef.current.push(timeout);
+  }
+
   const voteMutation = useMutation({
     mutationFn: () => toggleProjectVote(projectId),
     onError: (
@@ -52,17 +101,13 @@ export function VoteButton({
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: voteQueryKey });
       const previousVote = queryClient.getQueryData<VoteState>(voteQueryKey);
+      const currentVote = previousVote ?? voteState;
+      const nextVote = !currentVote.voted;
 
-      queryClient.setQueryData<VoteState>(voteQueryKey, (current) => {
-        const nextVote = !(current ?? voteState).voted;
-
-        return {
-          count: Math.max(
-            0,
-            (current ?? voteState).count + (nextVote ? 1 : -1),
-          ),
-          voted: nextVote,
-        };
+      ignoreNextRealtimeEvent(nextVote ? "INSERT" : "DELETE");
+      queryClient.setQueryData<VoteState>(voteQueryKey, {
+        count: Math.max(0, currentVote.count + (nextVote ? 1 : -1)),
+        voted: nextVote,
       });
 
       return { previousVote };
@@ -81,6 +126,47 @@ export function VoteButton({
       return;
     }
 
+    function updateVoteState(payload: ProjectVotePayload) {
+      if (payload.eventType === "UPDATE") {
+        return;
+      }
+
+      const voterId = payload.new?.voter_id ?? payload.old?.voter_id;
+
+      if (voterId) {
+        const key = realtimeEventKey(payload.eventType, projectId, voterId);
+        const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+
+        if (remaining > 0) {
+          if (remaining === 1) {
+            ignoredRealtimeEventsRef.current.delete(key);
+          } else {
+            ignoredRealtimeEventsRef.current.set(key, remaining - 1);
+          }
+
+          return;
+        }
+      }
+
+      const delta = payload.eventType === "INSERT" ? 1 : -1;
+      const effectVoteQueryKey = projectQueryKeys.votes(projectId);
+
+      queryClient.setQueryData<VoteState>(effectVoteQueryKey, (current) => {
+        const currentVote = current ?? {
+          count: initialCount,
+          voted: initialVoted,
+        };
+
+        return {
+          count: Math.max(0, currentVote.count + delta),
+          voted:
+            voterId === user?.id
+              ? payload.eventType === "INSERT"
+              : currentVote.voted,
+        };
+      });
+    }
+
     const channel = supabase
       .channel(`project-votes-${projectId}`)
       .on(
@@ -91,17 +177,23 @@ export function VoteButton({
           table: "project_votes",
           filter: `project_id=eq.${projectId}`,
         },
-        () =>
-          queryClient.invalidateQueries({
-            queryKey: projectQueryKeys.votes(projectId),
-          }),
+        (payload) => updateVoteState(payload as ProjectVotePayload),
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId, queryClient]);
+  }, [initialCount, initialVoted, projectId, queryClient, user?.id]);
+
+  useEffect(
+    () => () => {
+      for (const timeout of ignoredRealtimeTimeoutsRef.current) {
+        clearTimeout(timeout);
+      }
+    },
+    [],
+  );
 
   function vote() {
     if (voteMutation.isPending) {

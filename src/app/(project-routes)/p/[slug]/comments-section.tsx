@@ -2,7 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
@@ -23,17 +23,40 @@ type CommentsSectionProps = {
   initialSignedIn: boolean;
 };
 
+type CommentVoteRow = {
+  comment_id?: string;
+  voter_id?: string;
+};
+
+type CommentVotePayload = {
+  eventType: "INSERT" | "DELETE" | "UPDATE";
+  new: CommentVoteRow | null;
+  old: CommentVoteRow | null;
+};
+
 const maxCommentLength = 1200;
+
+function commentVoteEventKey(
+  eventType: "INSERT" | "DELETE",
+  commentId: string,
+  voterId: string,
+) {
+  return `${eventType}:${commentId}:${voterId}`;
+}
 
 export function CommentsSection({
   projectId,
   initialComments,
   initialSignedIn,
 }: CommentsSectionProps) {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const signedIn = isSignedIn ?? initialSignedIn;
   const queryClient = useQueryClient();
   const commentsQueryKey = projectQueryKeys.comments(projectId);
+  const ignoredRealtimeEventsRef = useRef(new Map<string, number>());
+  const ignoredRealtimeTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>(
+    [],
+  );
   const { data: comments = initialComments } = useQuery({
     initialData: initialComments,
     queryFn: () => fetchProjectComments(projectId),
@@ -41,6 +64,35 @@ export function CommentsSection({
   });
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  function ignoreNextRealtimeEvent(
+    eventType: "INSERT" | "DELETE",
+    commentId: string,
+  ) {
+    if (!user?.id) {
+      return;
+    }
+
+    const key = commentVoteEventKey(eventType, commentId, user.id);
+    ignoredRealtimeEventsRef.current.set(
+      key,
+      (ignoredRealtimeEventsRef.current.get(key) ?? 0) + 1,
+    );
+
+    const timeout = setTimeout(() => {
+      const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+
+      if (remaining <= 1) {
+        ignoredRealtimeEventsRef.current.delete(key);
+        return;
+      }
+
+      ignoredRealtimeEventsRef.current.set(key, remaining - 1);
+    }, 10_000);
+
+    ignoredRealtimeTimeoutsRef.current.push(timeout);
+  }
+
   const commentMutation = useMutation({
     mutationFn: (commentBody: string) =>
       createProjectComment(projectId, commentBody),
@@ -75,21 +127,31 @@ export function CommentsSection({
       await queryClient.cancelQueries({ queryKey: commentsQueryKey });
       const previousComments =
         queryClient.getQueryData<ProjectComment[]>(commentsQueryKey);
+      const currentComments = previousComments ?? comments;
+      const currentComment = currentComments.find(
+        (comment) => comment.id === commentId,
+      );
+      const nextVoted = !currentComment?.voted;
 
-      queryClient.setQueryData<ProjectComment[]>(commentsQueryKey, (current) =>
+      ignoreNextRealtimeEvent(nextVoted ? "INSERT" : "DELETE", commentId);
+
+      queryClient.setQueryData<ProjectComment[]>(
+        commentsQueryKey,
         sortCommentsByVotes(
-          current?.map((comment) => {
+          currentComments.map((comment) => {
             if (comment.id !== commentId) {
               return comment;
             }
 
-            const voted = !comment.voted;
             return {
               ...comment,
-              voted,
-              votesCount: Math.max(0, comment.votesCount + (voted ? 1 : -1)),
+              voted: nextVoted,
+              votesCount: Math.max(
+                0,
+                comment.votesCount + (nextVoted ? 1 : -1),
+              ),
             };
-          }) ?? [],
+          }),
         ),
       );
 
@@ -141,10 +203,63 @@ export function CommentsSection({
           schema: "public",
           table: "project_comment_votes",
         },
-        () =>
-          queryClient.invalidateQueries({
-            queryKey: projectQueryKeys.comments(projectId),
-          }),
+        (payload) => {
+          const votePayload = payload as CommentVotePayload;
+
+          if (votePayload.eventType === "UPDATE") {
+            return;
+          }
+
+          const commentId =
+            votePayload.new?.comment_id ?? votePayload.old?.comment_id;
+          const voterId =
+            votePayload.new?.voter_id ?? votePayload.old?.voter_id;
+
+          if (!commentId) {
+            return;
+          }
+
+          if (voterId) {
+            const key = commentVoteEventKey(
+              votePayload.eventType,
+              commentId,
+              voterId,
+            );
+            const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+
+            if (remaining > 0) {
+              if (remaining === 1) {
+                ignoredRealtimeEventsRef.current.delete(key);
+              } else {
+                ignoredRealtimeEventsRef.current.set(key, remaining - 1);
+              }
+
+              return;
+            }
+          }
+
+          const delta = votePayload.eventType === "INSERT" ? 1 : -1;
+          const effectCommentsQueryKey = projectQueryKeys.comments(projectId);
+
+          queryClient.setQueryData<ProjectComment[]>(
+            effectCommentsQueryKey,
+            (current) =>
+              sortCommentsByVotes(
+                current?.map((comment) =>
+                  comment.id === commentId
+                    ? {
+                        ...comment,
+                        voted:
+                          voterId === user?.id
+                            ? votePayload.eventType === "INSERT"
+                            : comment.voted,
+                        votesCount: Math.max(0, comment.votesCount + delta),
+                      }
+                    : comment,
+                ) ?? [],
+              ),
+          );
+        },
       )
       .subscribe();
 
@@ -152,7 +267,16 @@ export function CommentsSection({
       supabase.removeChannel(commentsChannel);
       supabase.removeChannel(commentVotesChannel);
     };
-  }, [projectId, queryClient]);
+  }, [projectId, queryClient, user?.id]);
+
+  useEffect(
+    () => () => {
+      for (const timeout of ignoredRealtimeTimeoutsRef.current) {
+        clearTimeout(timeout);
+      }
+    },
+    [],
+  );
 
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
