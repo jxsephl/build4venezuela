@@ -35,6 +35,7 @@ type CommentVotePayload = {
 };
 
 const maxCommentLength = 1200;
+const REALTIME_INACTIVE_TIMEOUT_MS = 60_000;
 
 function commentVoteEventKey(
   eventType: "INSERT" | "DELETE",
@@ -177,95 +178,174 @@ export function CommentsSection({
       return;
     }
 
-    const commentsChannel = supabase
-      .channel(`project-comments-${projectId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "project_comments",
-          filter: `project_id=eq.${projectId}`,
-        },
-        () =>
-          queryClient.invalidateQueries({
-            queryKey: projectQueryKeys.comments(projectId),
-          }),
-      )
-      .subscribe();
+    const realtime = supabase;
+    let commentsChannel: ReturnType<typeof realtime.channel> | null = null;
+    let commentVotesChannel: ReturnType<typeof realtime.channel> | null = null;
+    let inactiveTimer: number | null = null;
+    let hasConnected = false;
 
-    const commentVotesChannel = supabase
-      .channel(`project-comment-votes-${projectId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "project_comment_votes",
-        },
-        (payload) => {
-          const votePayload = payload as CommentVotePayload;
+    function updateCommentVote(payload: CommentVotePayload) {
+      if (payload.eventType === "UPDATE") {
+        return;
+      }
 
-          if (votePayload.eventType === "UPDATE") {
-            return;
+      const commentId = payload.new?.comment_id ?? payload.old?.comment_id;
+      const voterId = payload.new?.voter_id ?? payload.old?.voter_id;
+
+      if (!commentId) {
+        return;
+      }
+
+      if (voterId) {
+        const key = commentVoteEventKey(payload.eventType, commentId, voterId);
+        const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+
+        if (remaining > 0) {
+          if (remaining === 1) {
+            ignoredRealtimeEventsRef.current.delete(key);
+          } else {
+            ignoredRealtimeEventsRef.current.set(key, remaining - 1);
           }
 
-          const commentId =
-            votePayload.new?.comment_id ?? votePayload.old?.comment_id;
-          const voterId =
-            votePayload.new?.voter_id ?? votePayload.old?.voter_id;
+          return;
+        }
+      }
 
-          if (!commentId) {
-            return;
-          }
+      const delta = payload.eventType === "INSERT" ? 1 : -1;
+      const effectCommentsQueryKey = projectQueryKeys.comments(projectId);
 
-          if (voterId) {
-            const key = commentVoteEventKey(
-              votePayload.eventType,
-              commentId,
-              voterId,
-            );
-            const remaining = ignoredRealtimeEventsRef.current.get(key) ?? 0;
+      queryClient.setQueryData<ProjectComment[]>(
+        effectCommentsQueryKey,
+        (current) =>
+          sortCommentsByVotes(
+            current?.map((comment) =>
+              comment.id === commentId
+                ? {
+                    ...comment,
+                    voted:
+                      voterId === user?.id
+                        ? payload.eventType === "INSERT"
+                        : comment.voted,
+                    votesCount: Math.max(0, comment.votesCount + delta),
+                  }
+                : comment,
+            ) ?? [],
+          ),
+      );
+    }
 
-            if (remaining > 0) {
-              if (remaining === 1) {
-                ignoredRealtimeEventsRef.current.delete(key);
-              } else {
-                ignoredRealtimeEventsRef.current.set(key, remaining - 1);
-              }
+    function disconnect() {
+      if (inactiveTimer) {
+        window.clearTimeout(inactiveTimer);
+        inactiveTimer = null;
+      }
 
-              return;
-            }
-          }
+      if (commentsChannel) {
+        const currentChannel = commentsChannel;
+        commentsChannel = null;
+        void realtime.removeChannel(currentChannel);
+      }
 
-          const delta = votePayload.eventType === "INSERT" ? 1 : -1;
-          const effectCommentsQueryKey = projectQueryKeys.comments(projectId);
+      if (commentVotesChannel) {
+        const currentChannel = commentVotesChannel;
+        commentVotesChannel = null;
+        void realtime.removeChannel(currentChannel);
+      }
+    }
 
-          queryClient.setQueryData<ProjectComment[]>(
-            effectCommentsQueryKey,
-            (current) =>
-              sortCommentsByVotes(
-                current?.map((comment) =>
-                  comment.id === commentId
-                    ? {
-                        ...comment,
-                        voted:
-                          voterId === user?.id
-                            ? votePayload.eventType === "INSERT"
-                            : comment.voted,
-                        votesCount: Math.max(0, comment.votesCount + delta),
-                      }
-                    : comment,
-                ) ?? [],
-              ),
-          );
-        },
-      )
-      .subscribe();
+    function scheduleDisconnect() {
+      if (inactiveTimer) {
+        window.clearTimeout(inactiveTimer);
+      }
+
+      inactiveTimer = window.setTimeout(
+        disconnect,
+        REALTIME_INACTIVE_TIMEOUT_MS,
+      );
+    }
+
+    function connect() {
+      if (document.hidden) {
+        return;
+      }
+
+      if (commentsChannel && commentVotesChannel) {
+        scheduleDisconnect();
+        return;
+      }
+
+      disconnect();
+      const shouldReconcile = hasConnected;
+      hasConnected = true;
+
+      commentsChannel = realtime
+        .channel(`project-comments-${projectId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "project_comments",
+            filter: `project_id=eq.${projectId}`,
+          },
+          () =>
+            queryClient.invalidateQueries({
+              queryKey: projectQueryKeys.comments(projectId),
+            }),
+        )
+        .subscribe();
+
+      commentVotesChannel = realtime
+        .channel(`project-comment-votes-${projectId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "project_comment_votes",
+          },
+          (payload) => updateCommentVote(payload as CommentVotePayload),
+        )
+        .subscribe();
+
+      if (shouldReconcile) {
+        void queryClient.invalidateQueries({
+          queryKey: projectQueryKeys.comments(projectId),
+        });
+      }
+
+      scheduleDisconnect();
+    }
+
+    function syncActivity() {
+      connect();
+    }
+
+    function syncVisibility() {
+      if (document.hidden) {
+        disconnect();
+        return;
+      }
+
+      connect();
+    }
+
+    connect();
+    window.addEventListener("pointermove", syncActivity, { passive: true });
+    window.addEventListener("pointerdown", syncActivity, { passive: true });
+    window.addEventListener("scroll", syncActivity, { passive: true });
+    window.addEventListener("keydown", syncActivity);
+    window.addEventListener("focus", syncActivity);
+    document.addEventListener("visibilitychange", syncVisibility);
 
     return () => {
-      supabase.removeChannel(commentsChannel);
-      supabase.removeChannel(commentVotesChannel);
+      window.removeEventListener("pointermove", syncActivity);
+      window.removeEventListener("pointerdown", syncActivity);
+      window.removeEventListener("scroll", syncActivity);
+      window.removeEventListener("keydown", syncActivity);
+      window.removeEventListener("focus", syncActivity);
+      document.removeEventListener("visibilitychange", syncVisibility);
+      disconnect();
     };
   }, [projectId, queryClient, user?.id]);
 

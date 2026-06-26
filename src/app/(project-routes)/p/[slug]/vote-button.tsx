@@ -34,6 +34,8 @@ type ProjectVotePayload = {
   old: ProjectVoteRow | null;
 };
 
+const REALTIME_INACTIVE_TIMEOUT_MS = 60_000;
+
 function realtimeEventKey(
   eventType: "INSERT" | "DELETE",
   projectId: string,
@@ -126,6 +128,11 @@ export function VoteButton({
       return;
     }
 
+    const realtime = supabase;
+    let channel: ReturnType<typeof realtime.channel> | null = null;
+    let inactiveTimer: number | null = null;
+    let hasConnected = false;
+
     function updateVoteState(payload: ProjectVotePayload) {
       if (payload.eventType === "UPDATE") {
         return;
@@ -167,22 +174,96 @@ export function VoteButton({
       });
     }
 
-    const channel = supabase
-      .channel(`project-votes-${projectId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "project_votes",
-          filter: `project_id=eq.${projectId}`,
-        },
-        (payload) => updateVoteState(payload as ProjectVotePayload),
-      )
-      .subscribe();
+    function disconnect() {
+      if (inactiveTimer) {
+        window.clearTimeout(inactiveTimer);
+        inactiveTimer = null;
+      }
+
+      if (!channel) {
+        return;
+      }
+
+      const currentChannel = channel;
+      channel = null;
+      void realtime.removeChannel(currentChannel);
+    }
+
+    function scheduleDisconnect() {
+      if (inactiveTimer) {
+        window.clearTimeout(inactiveTimer);
+      }
+
+      inactiveTimer = window.setTimeout(
+        disconnect,
+        REALTIME_INACTIVE_TIMEOUT_MS,
+      );
+    }
+
+    function connect() {
+      if (document.hidden) {
+        return;
+      }
+
+      if (channel) {
+        scheduleDisconnect();
+        return;
+      }
+
+      const shouldReconcile = hasConnected;
+      hasConnected = true;
+      channel = realtime
+        .channel(`project-votes-${projectId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "project_votes",
+            filter: `project_id=eq.${projectId}`,
+          },
+          (payload) => updateVoteState(payload as ProjectVotePayload),
+        )
+        .subscribe();
+
+      if (shouldReconcile) {
+        void queryClient.invalidateQueries({
+          queryKey: projectQueryKeys.votes(projectId),
+        });
+      }
+
+      scheduleDisconnect();
+    }
+
+    function syncActivity() {
+      connect();
+    }
+
+    function syncVisibility() {
+      if (document.hidden) {
+        disconnect();
+        return;
+      }
+
+      connect();
+    }
+
+    connect();
+    window.addEventListener("pointermove", syncActivity, { passive: true });
+    window.addEventListener("pointerdown", syncActivity, { passive: true });
+    window.addEventListener("scroll", syncActivity, { passive: true });
+    window.addEventListener("keydown", syncActivity);
+    window.addEventListener("focus", syncActivity);
+    document.addEventListener("visibilitychange", syncVisibility);
 
     return () => {
-      supabase.removeChannel(channel);
+      window.removeEventListener("pointermove", syncActivity);
+      window.removeEventListener("pointerdown", syncActivity);
+      window.removeEventListener("scroll", syncActivity);
+      window.removeEventListener("keydown", syncActivity);
+      window.removeEventListener("focus", syncActivity);
+      document.removeEventListener("visibilitychange", syncVisibility);
+      disconnect();
     };
   }, [initialCount, initialVoted, projectId, queryClient, user?.id]);
 
