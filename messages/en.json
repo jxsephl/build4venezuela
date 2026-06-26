@@ -6,6 +6,8 @@
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
+    "navigationLabel": "Main navigation",
+    "brandPageLink": "Brand",
     "languageSelector": {
       "label": "Language",
       "locales": {
@@ -15,6 +17,65 @@
         "ja": "Japanese",
         "fr": "French",
         "pt": "Portuguese"
+      }
+    }
+  },
+  "BrandPage": {
+    "eyebrow": "Brand kit",
+    "title": "Share the signal.",
+    "description": "Use these official Build4Venezuela assets, fonts, and ready-to-post images to invite more builders, designers, volunteers, and allies into the effort.",
+    "cta": "Download social images",
+    "download": "Download {fileName}",
+    "downloadFormat": "Download {format}",
+    "assets": {
+      "eyebrow": "Assets",
+      "title": "Logos and marks",
+      "items": {
+        "logo": {
+          "title": "Build4Venezuela Logo",
+          "description": "Primary campaign logo in SVG format."
+        },
+        "mark": {
+          "title": "V Mark",
+          "description": "Compact mark for avatars, badges, and small placements."
+        },
+        "map": {
+          "title": "Venezuela Map",
+          "description": "Map illustration used across the campaign visuals."
+        },
+        "leftHand": {
+          "title": "Left Hand",
+          "description": "Left-side hand illustration for poster and hero compositions."
+        },
+        "rightHand": {
+          "title": "Right Hand",
+          "description": "Right-side hand illustration for poster and hero compositions."
+        }
+      }
+    },
+    "fonts": {
+      "eyebrow": "Fonts",
+      "title": "Input Mono Narrow",
+      "download": "Download",
+      "note": "Use the campaign font for posters, captions, slides, and project updates when possible. Keep messages urgent, useful, and easy to read."
+    },
+    "social": {
+      "eyebrow": "Social media",
+      "title": "Ready to post",
+      "description": "Download an image, post it on your social channels, and ask people to join, build, translate, mentor, donate, or share verified information.",
+      "items": {
+        "square": {
+          "title": "Square Post",
+          "description": "Instagram, LinkedIn, and feed-ready format."
+        },
+        "portrait": {
+          "title": "Portrait Post",
+          "description": "Tall feed image for Instagram and LinkedIn."
+        },
+        "story": {
+          "title": "Story",
+          "description": "Vertical story format for Instagram, TikTok, and WhatsApp."
+        }
       }
     }
   },

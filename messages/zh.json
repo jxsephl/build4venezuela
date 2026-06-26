@@ -6,6 +6,8 @@
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
+    "navigationLabel": "主导航",
+    "brandPageLink": "品牌",
     "languageSelector": {
       "label": "语言",
       "locales": {
@@ -15,6 +17,65 @@
         "ja": "日语",
         "fr": "法语",
         "pt": "葡萄牙语"
+      }
+    }
+  },
+  "BrandPage": {
+    "eyebrow": "品牌素材包",
+    "title": "把信号传出去。",
+    "description": "使用这些 Build4Venezuela 官方素材、字体和可直接发布的图片，邀请更多建设者、设计师、志愿者和盟友参与。",
+    "cta": "下载社交媒体图片",
+    "download": "下载 {fileName}",
+    "downloadFormat": "下载 {format}",
+    "assets": {
+      "eyebrow": "素材",
+      "title": "Logo 和标志",
+      "items": {
+        "logo": {
+          "title": "Build4Venezuela Logo",
+          "description": "SVG 格式的主要活动 Logo。"
+        },
+        "mark": {
+          "title": "V 标志",
+          "description": "适用于头像、徽章和小尺寸位置的紧凑标志。"
+        },
+        "map": {
+          "title": "委内瑞拉地图",
+          "description": "用于活动视觉素材的地图插图。"
+        },
+        "leftHand": {
+          "title": "左手",
+          "description": "用于海报和首屏组合的左侧手部插图。"
+        },
+        "rightHand": {
+          "title": "右手",
+          "description": "用于海报和首屏组合的右侧手部插图。"
+        }
+      }
+    },
+    "fonts": {
+      "eyebrow": "字体",
+      "title": "Input Mono Narrow",
+      "download": "下载",
+      "note": "尽可能在海报、配文、幻灯片和项目更新中使用活动字体。保持信息紧急、有用且易读。"
+    },
+    "social": {
+      "eyebrow": "社交媒体",
+      "title": "可直接发布",
+      "description": "下载图片，发布到你的社交渠道，并邀请大家加入、构建、翻译、担任导师、捐助或分享已验证的信息。",
+      "items": {
+        "square": {
+          "title": "方形帖子",
+          "description": "适用于 Instagram、LinkedIn 和信息流的格式。"
+        },
+        "portrait": {
+          "title": "竖版帖子",
+          "description": "适用于 Instagram 和 LinkedIn 信息流的高图。"
+        },
+        "story": {
+          "title": "Story",
+          "description": "适用于 Instagram、TikTok 和 WhatsApp 的竖版格式。"
+        }
       }
     }
   },

@@ -6,6 +6,8 @@
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
+    "navigationLabel": "Navegación principal",
+    "brandPageLink": "Marca",
     "languageSelector": {
       "label": "Idioma",
       "locales": {
@@ -15,6 +17,65 @@
         "ja": "Japonés",
         "fr": "Francés",
         "pt": "Portugués"
+      }
+    }
+  },
+  "BrandPage": {
+    "eyebrow": "Kit de marca",
+    "title": "Comparte la señal.",
+    "description": "Usa estos assets oficiales de Build4Venezuela, fuentes e imágenes listas para publicar para invitar a más builders, diseñadores, voluntarios y aliados al esfuerzo.",
+    "cta": "Descargar imágenes sociales",
+    "download": "Descargar {fileName}",
+    "downloadFormat": "Descargar {format}",
+    "assets": {
+      "eyebrow": "Assets",
+      "title": "Logos y marcas",
+      "items": {
+        "logo": {
+          "title": "Logo Build4Venezuela",
+          "description": "Logo principal de la campaña en formato SVG."
+        },
+        "mark": {
+          "title": "Marca V",
+          "description": "Marca compacta para avatars, badges y espacios pequeños."
+        },
+        "map": {
+          "title": "Mapa de Venezuela",
+          "description": "Ilustración del mapa usada en los visuales de campaña."
+        },
+        "leftHand": {
+          "title": "Mano izquierda",
+          "description": "Ilustración de la mano izquierda para composiciones de poster y hero."
+        },
+        "rightHand": {
+          "title": "Mano derecha",
+          "description": "Ilustración de la mano derecha para composiciones de poster y hero."
+        }
+      }
+    },
+    "fonts": {
+      "eyebrow": "Fuentes",
+      "title": "Input Mono Narrow",
+      "download": "Descargar",
+      "note": "Usa la fuente de campaña en posters, captions, slides y updates de proyectos cuando sea posible. Mantén los mensajes urgentes, útiles y fáciles de leer."
+    },
+    "social": {
+      "eyebrow": "Redes sociales",
+      "title": "Listo para publicar",
+      "description": "Descarga una imagen, publícala en tus redes y pide a la gente que se una, construya, traduzca, apoye como mentor, done o comparta información verificada.",
+      "items": {
+        "square": {
+          "title": "Post cuadrado",
+          "description": "Formato listo para Instagram, LinkedIn y feed."
+        },
+        "portrait": {
+          "title": "Post vertical",
+          "description": "Imagen alta para feed de Instagram y LinkedIn."
+        },
+        "story": {
+          "title": "Story",
+          "description": "Formato vertical para Instagram, TikTok y WhatsApp."
+        }
       }
     }
   },

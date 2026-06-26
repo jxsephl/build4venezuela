@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { LanguageSelector } from "@/components/language-selector";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 const assetPath = "/BFV/assets/";
 
@@ -17,15 +18,6 @@ type Channel = {
 type ImpactStat = {
   value: string;
   label: string;
-};
-
-type Partner = {
-  name: string;
-  href: string;
-  image: string;
-  width: number;
-  height: number;
-  className: string;
 };
 
 function VMark({ className }: { className: string }) {
@@ -45,24 +37,14 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const headerT = await getTranslations("Header");
   const t = await getTranslations("HomePage");
   const projectIdeas = t.raw("projectIdeas") as string[];
   const channels = t.raw("channels") as Channel[];
   const impactStats = t.raw("impactStats") as ImpactStat[];
-  const partners = t.raw("partners") as Partner[];
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <header className="fixed inset-x-0 top-0 isolate z-40 border-white/15 border-b bg-black/95 px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur sm:px-8 lg:px-10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <p className="font-mono text-sm font-black uppercase leading-none tracking-[0.18em] text-white sm:text-base">
-            <span className="sm:hidden">{headerT("mobileBrand")}</span>
-            <span className="hidden sm:inline">{headerT("brand")}</span>
-          </p>
-          <LanguageSelector />
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-black" />
@@ -259,34 +241,7 @@ export default async function Home({ params }: Props) {
         </div>
       </section>
 
-      <footer className="bg-black px-5 py-14 text-white sm:px-8 lg:px-10">
-        <div className="mx-auto flex max-w-6xl flex-col-reverse gap-10 border-white/15 border-t pt-12 md:flex-row md:items-center md:justify-between">
-          <p className="max-w-md font-mono text-xs uppercase leading-6 tracking-[0.2em] text-white/45">
-            {t("footer.description")}
-          </p>
-
-          <div className="grid w-full max-w-[340px] grid-cols-3 items-center gap-3 sm:max-w-[560px] sm:gap-10 md:w-auto">
-            {partners.map((partner) => (
-              <a
-                className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black"
-                href={partner.href}
-                key={partner.name}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Image
-                  alt={partner.name}
-                  className={partner.className}
-                  draggable="false"
-                  height={partner.height}
-                  src={`${assetPath}${partner.image}`}
-                  width={partner.width}
-                />
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

@@ -6,6 +6,8 @@
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
+    "navigationLabel": "Navigation principale",
+    "brandPageLink": "Marque",
     "languageSelector": {
       "label": "Langue",
       "locales": {
@@ -15,6 +17,65 @@
         "ja": "Japonais",
         "fr": "Français",
         "pt": "Portugais"
+      }
+    }
+  },
+  "BrandPage": {
+    "eyebrow": "Kit de marque",
+    "title": "Partagez le signal.",
+    "description": "Utilisez ces ressources officielles Build4Venezuela, polices et images prêtes à publier pour inviter plus de builders, designers, bénévoles et alliés à participer.",
+    "cta": "Télécharger les images sociales",
+    "download": "Télécharger {fileName}",
+    "downloadFormat": "Télécharger {format}",
+    "assets": {
+      "eyebrow": "Ressources",
+      "title": "Logos et marques",
+      "items": {
+        "logo": {
+          "title": "Logo Build4Venezuela",
+          "description": "Logo principal de la campagne au format SVG."
+        },
+        "mark": {
+          "title": "Marque V",
+          "description": "Marque compacte pour avatars, badges et petits emplacements."
+        },
+        "map": {
+          "title": "Carte du Venezuela",
+          "description": "Illustration de carte utilisée dans les visuels de campagne."
+        },
+        "leftHand": {
+          "title": "Main gauche",
+          "description": "Illustration de main gauche pour les compositions d'affiche et de hero."
+        },
+        "rightHand": {
+          "title": "Main droite",
+          "description": "Illustration de main droite pour les compositions d'affiche et de hero."
+        }
+      }
+    },
+    "fonts": {
+      "eyebrow": "Polices",
+      "title": "Input Mono Narrow",
+      "download": "Télécharger",
+      "note": "Utilisez la police de campagne pour les affiches, légendes, slides et mises à jour de projet quand c'est possible. Gardez les messages urgents, utiles et faciles à lire."
+    },
+    "social": {
+      "eyebrow": "Réseaux sociaux",
+      "title": "Prêt à publier",
+      "description": "Téléchargez une image, publiez-la sur vos réseaux et invitez les gens à rejoindre, construire, traduire, mentorer, donner ou partager des informations vérifiées.",
+      "items": {
+        "square": {
+          "title": "Post carré",
+          "description": "Format prêt pour Instagram, LinkedIn et les fils d'actualité."
+        },
+        "portrait": {
+          "title": "Post portrait",
+          "description": "Image haute pour les fils Instagram et LinkedIn."
+        },
+        "story": {
+          "title": "Story",
+          "description": "Format vertical pour Instagram, TikTok et WhatsApp."
+        }
       }
     }
   },

@@ -6,6 +6,8 @@
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
+    "navigationLabel": "メインナビゲーション",
+    "brandPageLink": "ブランド",
     "languageSelector": {
       "label": "言語",
       "locales": {
@@ -15,6 +17,65 @@
         "ja": "日本語",
         "fr": "フランス語",
         "pt": "ポルトガル語"
+      }
+    }
+  },
+  "BrandPage": {
+    "eyebrow": "ブランドキット",
+    "title": "想いを広げよう。",
+    "description": "Build4Venezuelaの公式アセット、フォント、投稿用画像を使って、より多くのビルダー、デザイナー、ボランティア、支援者を招待してください。",
+    "cta": "SNS画像をダウンロード",
+    "download": "{fileName}をダウンロード",
+    "downloadFormat": "{format}をダウンロード",
+    "assets": {
+      "eyebrow": "アセット",
+      "title": "ロゴとマーク",
+      "items": {
+        "logo": {
+          "title": "Build4Venezuelaロゴ",
+          "description": "SVG形式のキャンペーン主要ロゴ。"
+        },
+        "mark": {
+          "title": "Vマーク",
+          "description": "アバター、バッジ、小さな配置に使えるコンパクトなマーク。"
+        },
+        "map": {
+          "title": "ベネズエラの地図",
+          "description": "キャンペーンビジュアルで使用される地図イラスト。"
+        },
+        "leftHand": {
+          "title": "左手",
+          "description": "ポスターやヒーロー構成に使う左側の手のイラスト。"
+        },
+        "rightHand": {
+          "title": "右手",
+          "description": "ポスターやヒーロー構成に使う右側の手のイラスト。"
+        }
+      }
+    },
+    "fonts": {
+      "eyebrow": "フォント",
+      "title": "Input Mono Narrow",
+      "download": "ダウンロード",
+      "note": "可能な限り、ポスター、キャプション、スライド、プロジェクト更新にキャンペーンフォントを使用してください。メッセージは緊急性があり、役に立ち、読みやすいものにしてください。"
+    },
+    "social": {
+      "eyebrow": "ソーシャルメディア",
+      "title": "すぐに投稿できます",
+      "description": "画像をダウンロードしてSNSに投稿し、参加、開発、翻訳、メンタリング、寄付、確認済み情報の共有を呼びかけてください。",
+      "items": {
+        "square": {
+          "title": "正方形投稿",
+          "description": "Instagram、LinkedIn、フィード向けの形式。"
+        },
+        "portrait": {
+          "title": "縦長投稿",
+          "description": "InstagramとLinkedInのフィード向け縦長画像。"
+        },
+        "story": {
+          "title": "ストーリー",
+          "description": "Instagram、TikTok、WhatsApp向けの縦型形式。"
+        }
       }
     }
   },
