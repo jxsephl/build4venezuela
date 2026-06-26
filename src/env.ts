@@ -3,10 +3,12 @@ import { z } from "zod";
 
 const requiredServerEnv = {
   AI_GATEWAY_API_KEY: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 };
 
 const requiredClientEnv = {
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
 };
@@ -18,6 +20,8 @@ export const env = createEnv({
   client: requiredClientEnv,
   emptyStringAsUndefined: true,
   experimental__runtimeEnv: {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
