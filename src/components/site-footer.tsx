@@ -44,7 +44,7 @@ export async function SiteFooter() {
           ))}
           <a
             className="transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-            href="http://nucleo.la/"
+            href="http://nucleo.la/?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners"
             rel="noreferrer"
             target="_blank"
           >

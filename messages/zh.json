@@ -150,7 +150,7 @@
     "partners": [
       {
         "name": "Moraleja Studio",
-        "href": "https://moraleja.co",
+        "href": "https://moraleja.co?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "moraleja-studio.svg",
         "width": 65,
         "height": 52,
@@ -158,7 +158,7 @@
       },
       {
         "name": "Crafter Station",
-        "href": "https://crafterstation.com",
+        "href": "https://crafterstation.com?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "CS.svg",
         "width": 140,
         "height": 34,
@@ -166,7 +166,7 @@
       },
       {
         "name": "The Hackathon Company",
-        "href": "https://hackathon.lat",
+        "href": "https://hackathon.lat?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "THC.svg",
         "width": 92,
         "height": 52,
