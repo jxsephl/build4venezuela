@@ -7,6 +7,7 @@ create table if not exists public.projects (
   countries text[] not null default '{}',
   participant_name text not null,
   video_url text not null default '',
+  contribute_in_url text not null default '',
   description_markdown text not null,
   owner_user_id text not null,
   spam_score numeric,
@@ -19,6 +20,7 @@ create table if not exists public.projects (
 alter table public.projects alter column video_url set default '';
 alter table public.projects add column if not exists status text not null default 'published';
 alter table public.projects add column if not exists published_at timestamptz default now();
+alter table public.projects add column if not exists contribute_in_url text not null default '';
 alter table public.projects drop constraint if exists projects_status_check;
 alter table public.projects add constraint projects_status_check check (status in ('draft', 'published', 'hidden'));
 update public.projects set published_at = created_at where published_at is null and status = 'published';

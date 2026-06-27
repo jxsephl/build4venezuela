@@ -27,6 +27,7 @@ const projectFormFields = [
   "countries",
   "participantName",
   "videoUrl",
+  "contributeInUrl",
   "descriptionMarkdown",
 ] as const;
 
@@ -199,6 +200,21 @@ export function ProjectForm({
           value={values.videoUrl}
         />
         <FieldError message={errors.videoUrl} />
+      </label>
+
+      <label className="grid gap-2" htmlFor="project-contribute-in-url">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          Contribution link (optional)
+        </span>
+        <Input
+          id="project-contribute-in-url"
+          name="contributeInUrl"
+          onChange={handleValueChange("contributeInUrl")}
+          placeholder="https://github.com/... or https://linkedin.com/..."
+          type="url"
+          value={values.contributeInUrl}
+        />
+        <FieldError message={errors.contributeInUrl} />
       </label>
 
       <label className="grid gap-2" htmlFor="project-description">

@@ -94,6 +94,16 @@ export default async function ProjectPage({ params }: Props) {
                   Watch demo
                 </a>
               ) : null}
+              {project.contributeInUrl ? (
+                <a
+                  className="inline-flex h-12 items-center border border-border px-5 font-mono text-sm font-bold uppercase tracking-[0.18em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                  href={project.contributeInUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Contribute
+                </a>
+              ) : null}
               <VoteButton
                 projectId={project.id}
                 initialCount={project.votesCount}

@@ -25,6 +25,7 @@ type ProjectRow = {
   countries: string[];
   participant_name: string;
   video_url: string;
+  contribute_in_url?: string | null;
   description_markdown: string;
   owner_user_id: string;
   spam_score: number | null;
@@ -100,6 +101,7 @@ function toProject(row: ProjectRow): Project {
     countries: row.countries,
     participantName: row.participant_name,
     videoUrl: row.video_url,
+    contributeInUrl: row.contribute_in_url ?? "",
     descriptionMarkdown: row.description_markdown,
     publishedAt: row.published_at ?? row.created_at,
     createdAt: row.created_at,
@@ -132,6 +134,7 @@ function toRow(
     countries: normalizeCountries(input.countries),
     participant_name: input.participantName,
     video_url: input.videoUrl,
+    contribute_in_url: input.contributeInUrl,
     description_markdown: input.descriptionMarkdown,
     owner_user_id: input.ownerUserId,
     spam_score: input.spamScore,

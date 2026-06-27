@@ -9,6 +9,7 @@ export type Project = {
   countries: string[];
   participantName: string;
   videoUrl: string;
+  contributeInUrl: string;
   descriptionMarkdown: string;
   publishedAt: string | null;
   createdAt: string;
@@ -104,6 +105,18 @@ export const projectFormSchema = z.object({
         return false;
       }
     }, "Use YouTube, Vimeo, Loom, Screen Studio, or a similar hosted video link."),
+  contributeInUrl: z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (!value) return true;
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol);
+      } catch {
+        return false;
+      }
+    }, "Enter a valid http(s) URL."),
   descriptionMarkdown: z
     .string()
     .trim()
@@ -139,6 +152,7 @@ export function projectToFormValues(project: Project) {
     countries: project.countries.join(", "),
     participantName: project.participantName,
     videoUrl: project.videoUrl,
+    contributeInUrl: project.contributeInUrl,
     descriptionMarkdown: project.descriptionMarkdown,
   };
 }
@@ -151,6 +165,7 @@ export function formDataToValues(formData: FormData) {
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),
     videoUrl: String(formData.get("videoUrl") ?? ""),
+    contributeInUrl: String(formData.get("contributeInUrl") ?? ""),
     descriptionMarkdown: String(formData.get("descriptionMarkdown") ?? ""),
   };
 }
